@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "produce": "node src/produce --param $param",
+    "consume": "node src/consume"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "command-line-args": "^6.0.0"
+  }
+}
