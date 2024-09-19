@@ -16,7 +16,8 @@ async function receiveMessage() {
         await channel.consume(queue, (message) => {
             const obj = JSON.parse(message.content.toString());
             console.log(obj.name);
-        }, { noAck: true });
+            channel.ack(message);
+        }, { noAck: false });
 
         console.log(' [*] Waiting for messages. To exit press CTRL+C');
     } catch (error) {
