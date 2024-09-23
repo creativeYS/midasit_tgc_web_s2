@@ -16,7 +16,7 @@ async function receiveMessage() {
             if (msg !== null) {
                 const content = msg.content.toString();
                 const payload = JSON.parse(content);
-                const date = new Date(payload.date);
+                console.log(`[CONSUME] ${payload.name}`)
                 channel.ack(msg);
             }
         }, {
