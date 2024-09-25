@@ -1,4 +1,5 @@
 const amqp = require('amqplib');
+const fs = require('fs');
 
 async function receiveMessage() {
     try {
@@ -25,10 +26,21 @@ async function receiveMessage() {
                 const payload = JSON.parse(content);
                 // do something with payload
                 const date = new Date(payload.date);
-                console.log(`  [CONSUME] ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} : hello ${payload.name}`)
+                const fileName = payload.fileName;
+                const key = payload.key;
+                console.log(`  [CONSUME] ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} : hello ${key}, ${fileName}`)
 
-                // 메시지 처리 완료 시 ack 보내기
-                channel.ack(msg);
+                const filePath = `./files/${key}/${fileName}`
+                if (fs.existsSync(filePath)) {
+                    console.log('  [CONSUME] processing...');
+
+                    // 메시지 처리 완료
+                    channel.ack(msg);
+                }
+                else {
+                    console.log(`  [ERROR] "${key}/${fileName}" is not found...`);
+                }
+
             }
         }, {
             noAck: false // 수신 확인 (acknowledge) 설정
