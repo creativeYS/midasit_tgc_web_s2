@@ -1,15 +1,48 @@
 const amqp = require('amqplib');
 const commandLineArgs = require('command-line-args');
+const fs = require('fs');
+const path = require('path');
 
 const optionDefinitions = [
     { name: 'param', alias: 'v', type: String },
     { name: 'src', type: String, multiple: true, defaultOption: true }
 ];
 
+function generateRandomString(length) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 async function sendMessage() {
     try {
         const commandLine = commandLineArgs(optionDefinitions);
         const params = commandLine.src ?? [];
+        if(params.length === 0) {
+            console.log('input is not found')
+            return;
+        }
+
+        const filePath = params[0];
+
+        if (!fs.existsSync(filePath)) {
+            console.log('file is not exist.');
+        }
+
+        const fileName = path.basename(filePath);
+        const key = generateRandomString(10);
+
+        try {
+            const path = `./files/${key}`
+            fs.mkdirSync(path);
+            fs.copyFileSync(filePath, `${path}/${fileName}`);
+        } catch (err) {
+            console.error('fail to file copy : ', err);
+            return
+        }
 
         // RabbitMQ 서버에 연결
         const connection = await amqp.connect('amqp://localhost');
@@ -26,7 +59,8 @@ async function sendMessage() {
         // 보낼 메시지
         const message = JSON.stringify({
             date : new Date().toString(),
-            name: params[0],
+            fileName,
+            key,
         });
 
         // 메시지 전송
