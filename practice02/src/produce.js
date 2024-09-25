@@ -53,7 +53,11 @@ async function sendMessage() {
         // 큐 선언
         const queue = 'task_queue';
         await channel.assertQueue(queue, {
-            durable: true, // 메시지가 RabbitMQ 서버가 재시작되어도 유지되도록 durable 옵션 설정
+            durable: true, // 메시지를 영구적으로 유지
+            arguments: {
+                'x-message-ttl': 10000, // 메시지 TTL 10초 설정
+                'x-dead-letter-exchange': 'my_dlx' // 만료된 메시지를 보내는 DLX 설정
+            }
         });
 
         // 보낼 메시지
