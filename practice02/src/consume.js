@@ -1,5 +1,6 @@
 const amqp = require('amqplib');
 const fs = require('fs');
+const { exec } = require('child_process');
 
 async function receiveMessage() {
     try {
@@ -47,6 +48,18 @@ async function receiveMessage() {
                 if (fs.existsSync(filePath) && ext === 'dwg') {
                     console.log('  [CONSUME] processing...');
 
+                    exec(`.\\WebTools\\win\\FileConverter.exe ".\\files\\${payload.key}\\${payload.fileName}" ".\\files\\${payload.key}\\test.obj"`, (error, stdout, stderr) => {
+                        if (error) {
+                          console.error(`Error executing command: ${error}`);
+                          return;
+                        }
+                        if (stderr) {
+                          console.error(`Error in conversion: ${stderr}`);
+                          return;
+                        }
+                        console.log(`Conversion successful: ${stdout}`);
+                    });
+
                     // 메시지 처리 완료
                     channel.ack(msg);
                 }
@@ -59,7 +72,7 @@ async function receiveMessage() {
             noAck: false // 수신 확인 (acknowledge) 설정
         });
 
-        channel.consume(queue, (msg) => {
+        channel.consume(dlx_queue, (msg) => {
             console.log(`[DLQ] Received ${msg.content.toString()}`);
             channel.ack(msg);
         }, {
