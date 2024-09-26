@@ -11,22 +11,28 @@ async function receiveMessage() {
         // 큐 선언
         const queue = 'task_queue';
         await channel.assertQueue(queue, {
-            durable: true, // 메시지가 RabbitMQ 서버가 재시작되어도 유지되도록 durable 옵션 설정
+            durable: true // 메시지를 영구적으로 유지
         });
 
+        console.log(`[*] Waiting for messages in ${queue}. To exit press CTRL+C`);
+
+        // 메시지 소비 (consume)
         channel.consume(queue, (msg) => {
-            const message = msg.content.toString();
-            const name = JSON.parse(message).name;
-            console.log(name);
+            if (msg !== null) {
+                const content = msg.content.toString();
+                console.log(`[CONSUME] Received ${content}`);
 
-            channel.ack(msg, true);
+                const payload = JSON.parse(content);
+                // do something with payload
+                const date = new Date(payload.date);
+                console.log(`  [CONSUME] ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} : hello ${payload.name}`)
+
+                // 메시지 처리 완료 시 ack 보내기
+                channel.ack(msg);
+            }
+        }, {
+            noAck: false // 수신 확인 (acknowledge) 설정
         });
-
-        // 연결 닫기
-        setTimeout(() => {
-            connection.close();
-            process.exit(0);
-        }, 500);
     } catch (error) {
         console.error('Error occurred:', error);
     }
