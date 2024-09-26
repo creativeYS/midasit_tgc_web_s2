@@ -29,6 +29,8 @@ async function receiveMessage() {
 
         console.log(`[*] Waiting for messages in ${queue}. To exit press CTRL+C`);
 
+        const { exec } = require("child_process");
+
         // 메시지 소비 (consume)
         channel.consume(queue, (msg) => {
             if (msg !== null) {
@@ -44,9 +46,22 @@ async function receiveMessage() {
 
                 const filePath = `./files/${key}/${fileName}`
                 const ext = fileName.split('.').pop().toLowerCase();
+                const onlyFileName = filePath.split('.').slice(0, -1).join('.');
+
                 if (fs.existsSync(filePath) && ext === 'dwg') {
                     console.log('  [CONSUME] processing...');
-
+                    const param = `"${onlyFileName}.dwg" "${onlyFileName}.obj"`;
+                    exec(`/mnt/d/MIDAS/TGC/midasit_tgc_web_s2_main/practice02/../../WebTools/FileConverter ` + param, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`Error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.error(`Standard Error: ${stderr}`);
+                            return;
+                        }
+                        console.log(`Output: ${stdout}`);
+                    });
                     // 메시지 처리 완료
                     channel.ack(msg);
                 }
@@ -59,7 +74,7 @@ async function receiveMessage() {
             noAck: false // 수신 확인 (acknowledge) 설정
         });
 
-        channel.consume(queue, (msg) => {
+        channel.consume(dlx_queue, (msg) => {
             console.log(`[DLQ] Received ${msg.content.toString()}`);
             channel.ack(msg);
         }, {
