@@ -47,6 +47,30 @@ async function receiveMessage() {
                 if (fs.existsSync(filePath) && ext === 'dwg') {
                     console.log('  [CONSUME] processing...');
 
+                    const { spawn } = require('child_process');
+                    // 실행할 콘솔 앱과 인자들
+                    const appPath = './app/linux/dist/WebTools/FileConverter';
+                    const inputFile = filePath;
+                    const outputFile = './app/result/output.obj';
+
+                    // 콘솔 앱 실행
+                    const converter = spawn(appPath, [inputFile, outputFile]);
+                    // 표준 출력 처리
+                    converter.stdout.on('data', (data) => {
+                        console.log(`stdout: ${data}`);
+                    });
+
+                    // 표준 오류 처리
+                    converter.stderr.on('data', (data) => {
+                        console.error(`stderr: ${data}`);
+                    });
+
+                    // 실행 종료 시 처리
+                    converter.on('close', (code) => {
+                        console.log(`프로세스 종료 코드: ${code}`);
+                    });
+
+
                     // 메시지 처리 완료
                     channel.ack(msg);
                 }
