@@ -48,7 +48,7 @@ async function receiveMessage() {
                 if (fs.existsSync(filePath) && ext === 'dwg') {
                     console.log('  [CONSUME] processing...');
 
-                    exec(`.\\WebTools\\win\\FileConverter.exe ".\\files\\${payload.key}\\${payload.fileName}" ".\\files\\${payload.key}\\test.obj"`, (error, stdout, stderr) => {
+                    exec(`./WebTools/lnx/FileConverter "./files/${payload.key}/${payload.fileName}" "./files/${payload.key}/test.obj"`, (error, stdout, stderr) => {
                         if (error) {
                           console.error(`Error executing command: ${error}`);
                           return;
