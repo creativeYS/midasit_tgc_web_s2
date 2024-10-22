@@ -49,16 +49,33 @@ app.on('window-all-closed', function () {
 const {ipcMain} = require('electron')
 
 ipcMain.on('ping1', (event, arg) => {
-  console.log('main async : ', arg)  // "ping" 출력
-  event.sender.send('ping1-reply', 'pong')
+    console.log('main async : ', arg)  // "ping" 출력
+    event.sender.send('ping1-reply', 'pong')
 })
 
 ipcMain.on('ping2', (event, arg) => {
-  console.log('main sync : ', arg)  // "ping" 출력
-  event.returnValue = 'pong'
+    console.log('main sync : ', arg)  // "ping" 출력
+    event.returnValue = 'pong'
 })
 
 ipcMain.handle('ping3', async (event, arg) => {
-  console.log('main handle : ', arg)  // "ping" 출력
-  return 'pong';
+    console.log('main handle : ', arg)  // "ping" 출력
+    return 'pong';
 });
+
+const { Notification } = require('electron')
+
+ipcMain.on('toast-message', (event, arg)=>{
+    const noti = new Notification({
+        title: arg.title,
+        body: arg.body
+    });
+
+    noti.show()
+    noti.on('click', ()=>{
+        event.sender.send('toast-message-reply', 'Notification clicked!')
+    })
+    noti.on('close', ()=>{
+        event.sender.send('toast-message-reply', 'Notification closed!')
+    })
+})
