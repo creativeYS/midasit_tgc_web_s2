@@ -17,3 +17,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 )
+
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld("fileApi", {
+    selectAndDelete: async () => {
+        const filePath = await ipcRenderer.invoke("file-select");
+        console.log(filePath);
+        return await ipcRenderer.invoke("file-delete", {filePath})
+    },
+});
