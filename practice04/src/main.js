@@ -46,11 +46,27 @@ app.on('window-all-closed', function () {
 // code. You can also put them in separate files and require them here.
 
 // IPC
-const {ipcMain} = require('electron')
+const {ipcMain, dialog} = require('electron')
+const fs = require('fs')
+
+const defaultPath = 'c:\\temp\\';
 ipcMain.handle('file-select', async () => {
+    const fileSelected = dialog.showOpenDialogSync({ defaultPath, properties: ['openFile'] });
+    if(fileSelected.length > 0) {
+        const selected = fileSelected[0];
+        return selected.toLowerCase().startsWith(defaultPath) ? selected : undefined;
+    }
     return undefined;
 });
 
 ipcMain.handle('file-delete', async (event, args) => {
+    const {filePath} = args;
+
+    try {
+        fs.unlinkSync(filePath);
+        return true;
+    } catch (error) {
+        console.log(error);
+    }
     return false;
 })
