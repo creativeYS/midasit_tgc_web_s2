@@ -19,3 +19,11 @@ console.log('renderer sync : ', response) // "pong" 출력
 ipcRenderer.invoke('ping3', 'ping').then((data)=>{
     console.log('renderer async invoke : ', data);
 })
+
+ipcRenderer.on('toast-message-reply', (event, arg) => {
+    document.getElementById('output').innerText = arg
+})
+
+document.getElementById('output').onclick = () => {
+    ipcRenderer.send('toast-message', {title : 'Hello', body : 'Welcome to TGC.'});
+}
