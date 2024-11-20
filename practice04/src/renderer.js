@@ -5,14 +5,12 @@
  * `contextIsolation` is turned on. Use the contextBridge API in `preload.js`
  * to expose Node.js functionality from the main process.
  */
-const { ipcRenderer } = require('electron')
 
 document.getElementById('select').onclick = async () => {
-    ipcRenderer.invoke('file-select').then(
-        (data)=> {
-            if(data) {
-                const result = ipcRenderer.invoke('file-delete', {filePath : data});
-                document.getElementById('output').innerText = `"${data}" is ${result ? 'deleted' : 'not deleted'}`;
+    window.fileApi.selectAndDelete().then(
+        (data) => {
+            if (data) {
+                document.getElementById('output').innerText = `${data ? 'deleted' : 'not deleted'}`;
             } else {
                 document.getElementById('output').innerText = 'Invalid file path';
             }
